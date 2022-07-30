@@ -17,27 +17,41 @@ const startVideo = async () => {
   }
 };
 
+const prepareCanvas = () => {
+  const canvas = faceapi.createCanvas(video);
+  canvas.width = video.clientWidth;
+  canvas.height = video.clientHeight;
+  document.body.append(canvas);
+  return canvas;
+};
+
+const clearCanvas = (canvas) => {
+  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+};
+
 const prepareFaceID = async () => {
   await loadModels();
   startVideo();
 
   video.addEventListener("playing", () => {
-    const canvas = faceapi.createCanvas(video);
-    canvas.width = video.clientWidth;
-    canvas.height = video.clientHeight;
-    document.body.append(canvas);
-    const displaySize = { width: video.clientWidth, height: video.clientHeight };
-    console.log('displaySize', JSON.stringify(displaySize, null, 2))
+    const canvas = prepareCanvas();
+    const displaySize = {
+      width: video.clientWidth,
+      height: video.clientHeight,
+    };
 
     setInterval(async () => {
       const detections = await faceapi
         .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
+        .withFaceDescriptors()
         .withFaceExpressions();
+      if (detections.length > 0) console.log(detections[0].detection)
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
-      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+      clearCanvas(canvas);
       faceapi.draw.drawDetections(canvas, resizedDetections);
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
     }, 100);
   });
 };
