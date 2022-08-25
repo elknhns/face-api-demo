@@ -46,7 +46,6 @@ const prepareFaceID = async () => {
         .withFaceLandmarks()
         .withFaceDescriptors()
         .withFaceExpressions();
-      if (detections.length > 0) console.log(detections[0].detection)
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       clearCanvas(canvas);
       faceapi.draw.drawDetections(canvas, resizedDetections);
